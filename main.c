@@ -48,17 +48,25 @@ int main()
         printf("Error creando hilo que guarda datos en el archivo\n");
     }
 
-    pthread_exit(NULL);
+    pthread_join(hiloInput, NULL);
+    pthread_join(hiloFile, NULL);
+    pthread_join(hiloHisto, NULL);
 
     pthread_mutex_destroy(&myMutex);
 
+    pthread_cond_destroy(&paramSend->isFull);
+    pthread_cond_destroy(&paramSend->isEmpty);
+
     free(paramSend->vecStr);
+    free(paramSend->vecHisto);
     free(paramSend);
+
+    pthread_exit(NULL);
 }
 
 int initParam(param_t *param)
 {
-    param->vecStr = calloc(CAPACIDAD, sizeof(char*));
+    param->vecStr = malloc(CAPACIDAD * sizeof(string_t));
     if (!param->vecStr)
     {
         printf("Error soliciendo memoria\n");
@@ -70,8 +78,6 @@ int initParam(param_t *param)
     param->contArc = 0;
     param->contHisto = 0;
     param->contProductor = 0;
-    param->flagArc = 0;
-    param->flagHisto = 0;
     param->flagFull = 0;
 
     param->flagEnd = 1;
@@ -83,6 +89,9 @@ int initParam(param_t *param)
         free(param);
         return ERR;
     }
+
+    pthread_cond_init(&param->isFull, NULL);
+    pthread_cond_init(&param->isEmpty, NULL);
 
     return OK;
 }

@@ -1,7 +1,7 @@
 #include "fThreads.h"
 #include <stdlib.h>
 
-int addPila(param_t *p, char* s);
+int addPila(param_t *param, char* str);
 
 void *inputThread(void *p)
 {
@@ -17,17 +17,17 @@ void *inputThread(void *p)
             break;
         }
 
+        printf("Introduzca el texto: ");
         fgets(buffStr, N, stdin);
 
         pthread_mutex_lock(&myMutex);
 
-        while(1)
+        if(!addPila(parametros, buffStr))
         {
-            if(addPila(parametros, buffStr))
-            {
-                break;
-            }
+            pthread_cond_wait(&parametros->isFull, &myMutex);
+            addPila(parametros, buffStr);
         }
+        pthread_cond_broadcast(&parametros->isEmpty);
 
         pthread_mutex_unlock(&myMutex);    
     }
@@ -37,14 +37,14 @@ void *inputThread(void *p)
     return NULL;
 }
 
-int addPila(param_t *param, char* s)
+int addPila(param_t *param, char* str)
 {
     if((param->contProductor == param->contArc) && (param->contProductor == param->contHisto) && param->flagFull)
     {
         return ERR;
     }
 
-    param->vecStr[param->contProductor] = s;
+    (param->vecStr[param->contProductor]).s = str;
 
     param->contProductor++;
 

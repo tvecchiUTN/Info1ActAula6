@@ -2,70 +2,71 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-
-int extPilaFile(param_t *p, char *data);
+char *extPilaFile(param_t *p);
 
 void *fileThread(void *p)
 {
     param_t *param = (param_t *)p;
 
+    int f = open("histograma.txt", O_WRONLY | O_CREAT | O_TRUNC, 0664);
+    if (f < 0)
+    {
+        printf("EL archivo no se pudo crear\n");
+        pthread_exit(NULL);
+    }
+
     while (param->flagEnd)
     {
         char *strAnalyze = NULL;
 
-        int f = open("histograma.txt", O_WRONLY | O_CREAT | O_TRUNC, 0664);
-        if (f < 0)
-        {
-            printf("EL archivo no se pudo crear\n");
-            param->flagArc = 1;
-            break;
-        }
-
         pthread_mutex_lock(&myMutex);
 
-        while (1)
+        strAnalyze = extPilaFile(param);
+        if (!strAnalyze)
         {
-            if (extPilaFile(param, strAnalyze))
-            {
-                break;
-            }
+            pthread_cond_wait(&param->isEmpty, &myMutex);
+            strAnalyze = extPilaFile(param);
         }
+        pthread_cond_signal(&param->isFull);
 
         pthread_mutex_unlock(&myMutex);
 
-        if(write(f, strAnalyze, N) < 0)
-        {
-            printf("Error al escribir datos\n");
-        } 
+        char auxS[N];
+        int i;
 
         pthread_mutex_lock(&myMutex);
-
-        param->flagArc = 1;
-
-        if(param->flagArc && param->flagHisto)
+        for (i = 0; (strAnalyze[i] != '\n') && strAnalyze[i]; i++)
         {
-            free(strAnalyze);
-            param->flagArc = 0;
+            auxS[i] = strAnalyze[i];
         }
 
+        auxS[i] = '\n';
+
+        if (write(f, auxS, i + 1) < 0)
+        {
+            printf("Error al escribir datos\n");
+        }
         pthread_mutex_unlock(&myMutex);
     }
 
+    close(f);
     pthread_exit(NULL);
 }
 
-int extPilaFile(param_t *p, char *data)
+char *extPilaFile(param_t *p)
 {
     if ((p->contProductor == p->contArc) && (p->contProductor == p->contHisto) && !p->flagFull)
     {
-        return ERR;
+        return NULL;
     }
 
-    data = p->vecStr[p->contArc];
+    char *auxRet = (p->vecStr[p->contArc]).s;
+    (p->vecStr[p->contArc]).flagArc = 1;
+
     p->contArc++;
     p->contArc %= p->sz;
 
     p->flagFull = 0;
 
-    return OK;
+    return auxRet;
 }

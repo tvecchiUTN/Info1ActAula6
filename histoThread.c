@@ -1,49 +1,36 @@
 #include "fThreads.h"
 #include <string.h>
 
-int extPilaHisto(param_t *p, char* data);
+char *extPilaHisto(param_t *p);
 
-void calcHisto(const char* s, int *histo);
+void calcHisto(const char *s, int *histo);
 
-void* histograma(void* p)
+void *histograma(void *p)
 {
-    param_t *param = (param_t*)p;
+    param_t *param = (param_t *)p;
 
-    while(param->flagEnd)
+    while (param->flagEnd)
     {
-        char* strAnalyze = NULL;
+        char *strAnalyze = NULL;
 
         pthread_mutex_lock(&myMutex);
 
-        while(1)
+        strAnalyze = extPilaHisto(param);
+        if (!strAnalyze)
         {
-            if(extPilaHisto(param, strAnalyze))
-            {
-                break;
-            }
+            pthread_cond_wait(&param->isEmpty, &myMutex);
+            strAnalyze = extPilaHisto(param);
         }
+        pthread_cond_signal(&param->isFull);
 
-        pthread_mutex_unlock(&myMutex);
-
-        if(strcmp(strAnalyze, FINALIZADOR))
+        if (!strcmp(strAnalyze, FINALIZADOR))
         {
             param->flagEnd = 0;
             free(strAnalyze);
             break;
         }
-        
+
         calcHisto(strAnalyze, param->vecHisto);
-
-        pthread_mutex_lock(&myMutex);
-
-        param->flagHisto = 1;
-
-        if(param->flagHisto && param->flagArc)
-        {
-            free(strAnalyze);
-            param->flagArc = 0;
-            param->flagHisto = 0;
-        }
 
         pthread_mutex_unlock(&myMutex);
     }
@@ -51,32 +38,34 @@ void* histograma(void* p)
     pthread_exit(NULL);
 }
 
-int extPilaHisto(param_t *p, char* data)
+char *extPilaHisto(param_t *p)
 {
-    if((p->contProductor == p->contArc) && (p->contProductor == p->contHisto) && !p->flagFull)
+    if ((p->contProductor == p->contArc) && (p->contProductor == p->contHisto) && !p->flagFull)
     {
-        return ERR;
+        return NULL;
     }
 
-    data = p->vecStr[p->contHisto];
+    char *auxRet = (p->vecStr[p->contHisto]).s;
+    (p->vecStr[p->contHisto]).flagHisto = 1;
+
     p->contHisto++;
     p->contHisto %= p->sz;
 
     p->flagFull = 0;
 
-    return OK;
+    return auxRet;
 }
 
-void calcHisto(const char* s, int *histo)
+void calcHisto(const char *s, int *histo)
 {
-    for(int i = 0; s[i]; i++)
+    for (int i = 0; s[i]; i++)
     {
-        if((s[i] >= 'a') && (s[i] <= 'z'))
+        if ((s[i] >= 'a') && (s[i] <= 'z'))
         {
             int n = s[i] - 'a';
             histo[n]++;
         }
-        else if((s[i] >= 'A') && (s[i] <= 'Z'))
+        else if ((s[i] >= 'A') && (s[i] <= 'Z'))
         {
             int n = s[i] - 'A';
             histo[n]++;

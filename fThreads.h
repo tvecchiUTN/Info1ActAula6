@@ -10,26 +10,33 @@ extern pthread_mutex_t myMutex;
 #define OK 1
 #define ERR 0
 
-#define CAPACIDAD 32
+#define CAPACIDAD 32 //Del array de strings
 
-#define FINALIZADOR "InfoI-2022"
+#define FINALIZADOR "InfoI-2022\n"
 
-#define N 64
+#define N 64 //Para el string
 
+typedef struct 
+{
+    char* s;
+    int flagArc, flagHisto;
+}string_t;
 typedef struct
 {
-    char **vecStr;
+    string_t *vecStr;
+    
     int sz; //Osea la capacidad
 
     int contProductor; //Este va a ir añadiendo datos
     int contArc, contHisto; //Estos van a ir sacando datos
-    int flagArc, flagHisto; //Flags para saber si se puede eliminar o no
 
     int flagFull; //Este me avisa si esta lleno o no
 
     int flagEnd; //Si es positivo, significa que el programa llego a su fin
 
     int *vecHisto;
+
+    pthread_cond_t isFull, isEmpty;
 }param_t;
 
 void* inputThread(void*);
