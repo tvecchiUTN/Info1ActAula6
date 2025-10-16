@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-pthread_mutex_t myMutex;
 
 int extPilaFile(param_t *p, char *data);
 

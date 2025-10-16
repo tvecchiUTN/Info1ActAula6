@@ -1,9 +1,7 @@
 #include "fThreads.h"
 #include <stdlib.h>
 
-pthread_mutex_t myMutex;
-
-int addPila(param_t *p, const char* s);
+int addPila(param_t *p, char* s);
 
 void *inputThread(void *p)
 {
@@ -39,7 +37,7 @@ void *inputThread(void *p)
     return NULL;
 }
 
-int addPila(param_t *param, const char* s)
+int addPila(param_t *param, char* s)
 {
     if((param->contProductor == param->contArc) && (param->contProductor == param->contHisto) && param->flagFull)
     {

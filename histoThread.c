@@ -1,8 +1,6 @@
 #include "fThreads.h"
 #include <string.h>
 
-pthread_mutex_t myMutex;
-
 int extPilaHisto(param_t *p, char* data);
 
 void calcHisto(const char* s, int *histo);
