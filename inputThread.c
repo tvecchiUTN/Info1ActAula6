@@ -3,33 +3,56 @@
 
 pthread_mutex_t myMutex;
 
-#define N 64
-void* inputThread(void* param)
-{
-    param_t *parametros = (param_t *)param;
+int addPila(param_t *p, const char* s);
 
-    while(1)
+void *inputThread(void *p)
+{
+    param_t *parametros = (param_t *)p;
+
+    while (parametros->flagEnd)
     {
-        char *buffStr = malloc(N); //Sizeof(char) es 1
-        if(!buffStr)
+        char *buffStr = malloc(N); // Sizeof(char) es 1
+        if (!buffStr)
         {
             printf("Error solicitando memoria\n");
+            parametros->flagEnd = 1; //De este motivo, los otros hilos tambien cortan
             break;
         }
 
         fgets(buffStr, N, stdin);
 
         pthread_mutex_lock(&myMutex);
-        parametros ->vecStr[parametros ->contProductor] = buffStr;
 
-        parametros->contProductor += 1;
+        while(1)
+        {
+            if(addPila(parametros, buffStr))
+            {
+                break;
+            }
+        }
 
-        parametros->flagFull = 1;
-
-        pthread_mutex_unlock(&myMutex);
+        pthread_mutex_unlock(&myMutex);    
     }
-    
+
     pthread_exit(NULL);
 
     return NULL;
+}
+
+int addPila(param_t *param, const char* s)
+{
+    if((param->contProductor == param->contArc) && (param->contProductor == param->contHisto) && param->flagFull)
+    {
+        return ERR;
+    }
+
+    param->vecStr[param->contProductor] = s;
+
+    param->contProductor++;
+
+    param->contProductor %= param->sz;
+
+    param->flagFull = 1;
+
+    return OK;
 }
