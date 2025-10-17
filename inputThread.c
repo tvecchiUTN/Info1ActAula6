@@ -22,10 +22,9 @@ void *inputThread(void *p)
 
         pthread_mutex_lock(&myMutex);
 
-        if(!addPila(parametros, buffStr))
+        while(!addPila(parametros, buffStr))
         {
             pthread_cond_wait(&parametros->isFull, &myMutex);
-            addPila(parametros, buffStr);
         }
         pthread_cond_broadcast(&parametros->isEmpty);
 
@@ -39,9 +38,19 @@ void *inputThread(void *p)
 
 int addPila(param_t *param, char* str)
 {
-    if((param->contProductor == param->contArc) && (param->contProductor == param->contHisto) && param->flagFull)
+    if (param->cantArc >= param->sz || param->cantHisto >= param->sz)
     {
         return ERR;
+    }
+
+    int auxFArc = (param->vecStr[param->contProductor]).flagArc;
+    int auxFHis = (param->vecStr[param->contProductor]).flagHisto;
+    if(auxFArc && auxFHis)
+    {
+        free((param->vecStr[param->contProductor]).s);
+        (param->vecStr[param->contProductor]).s = NULL;
+        (param->vecStr[param->contProductor]).flagArc = 0;
+        (param->vecStr[param->contProductor]).flagHisto = 0;
     }
 
     (param->vecStr[param->contProductor]).s = str;
@@ -49,8 +58,9 @@ int addPila(param_t *param, char* str)
     param->contProductor++;
 
     param->contProductor %= param->sz;
-
-    param->flagFull = 1;
+    
+    param->cantArc++;
+    param->cantHisto++;
 
     return OK;
 }

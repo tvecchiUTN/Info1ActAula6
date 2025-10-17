@@ -18,35 +18,33 @@ void *fileThread(void *p)
     while (param->flagEnd)
     {
         char *strAnalyze = NULL;
+        char cpyStr[N];
 
         pthread_mutex_lock(&myMutex);
 
-        strAnalyze = extPilaFile(param);
-        if (!strAnalyze)
+        while(!(strAnalyze = extPilaFile(param)))
         {
             pthread_cond_wait(&param->isEmpty, &myMutex);
-            strAnalyze = extPilaFile(param);
         }
-        pthread_cond_signal(&param->isFull);
+        pthread_cond_broadcast(&param->isFull);
 
-        pthread_mutex_unlock(&myMutex);
+        strcpy(cpyStr, strAnalyze);
 
-        char auxS[N];
-        int i;
-
-        pthread_mutex_lock(&myMutex);
-        for (i = 0; (strAnalyze[i] != '\n') && strAnalyze[i]; i++)
+        pthread_mutex_unlock(&myMutex);   
+        
+        if (!strcmp(cpyStr, FINALIZADOR))
         {
-            auxS[i] = strAnalyze[i];
+            param->flagEnd = 0;
+            pthread_cond_broadcast(&param->isEmpty);
+            break;
         }
 
-        auxS[i] = '\n';
+        int szS = strlen(cpyStr);
 
-        if (write(f, auxS, i + 1) < 0)
+        if(write(f, cpyStr, szS) < 0)
         {
             printf("Error al escribir datos\n");
         }
-        pthread_mutex_unlock(&myMutex);
     }
 
     close(f);
@@ -55,7 +53,7 @@ void *fileThread(void *p)
 
 char *extPilaFile(param_t *p)
 {
-    if ((p->contProductor == p->contArc) && (p->contProductor == p->contHisto) && !p->flagFull)
+    if (p->cantArc == 0)
     {
         return NULL;
     }
@@ -66,7 +64,7 @@ char *extPilaFile(param_t *p)
     p->contArc++;
     p->contArc %= p->sz;
 
-    p->flagFull = 0;
+    p->cantArc--;
 
     return auxRet;
 }

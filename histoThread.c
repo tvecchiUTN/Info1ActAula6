@@ -12,27 +12,37 @@ void *histograma(void *p)
     while (param->flagEnd)
     {
         char *strAnalyze = NULL;
+        char copyStr[N];
 
         pthread_mutex_lock(&myMutex);
 
-        strAnalyze = extPilaHisto(param);
-        if (!strAnalyze)
+        while(!(strAnalyze = extPilaHisto(param)))
         {
             pthread_cond_wait(&param->isEmpty, &myMutex);
-            strAnalyze = extPilaHisto(param);
         }
-        pthread_cond_signal(&param->isFull);
+        pthread_cond_broadcast(&param->isFull);
 
-        if (!strcmp(strAnalyze, FINALIZADOR))
+        strcpy(copyStr, strAnalyze);
+
+        pthread_mutex_unlock(&myMutex);
+
+        if (!strcmp(copyStr, FINALIZADOR))
         {
             param->flagEnd = 0;
-            free(strAnalyze);
+            pthread_cond_broadcast(&param->isEmpty);
             break;
         }
 
-        calcHisto(strAnalyze, param->vecHisto);
+        calcHisto(copyStr, param->vecHisto);
 
-        pthread_mutex_unlock(&myMutex);
+        if(FLAGHISTO)
+        {
+            for(int i = 0; i < 26; i++)
+            {
+                printf("La letra %c aparecio %d\n", 'a'+i, param->vecHisto[i]);
+            }
+            FLAGHISTO = 0;
+        }
     }
 
     pthread_exit(NULL);
@@ -40,7 +50,7 @@ void *histograma(void *p)
 
 char *extPilaHisto(param_t *p)
 {
-    if ((p->contProductor == p->contArc) && (p->contProductor == p->contHisto) && !p->flagFull)
+    if (p->cantHisto == 0)
     {
         return NULL;
     }
@@ -51,7 +61,7 @@ char *extPilaHisto(param_t *p)
     p->contHisto++;
     p->contHisto %= p->sz;
 
-    p->flagFull = 0;
+    p->cantHisto--;
 
     return auxRet;
 }

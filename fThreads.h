@@ -3,7 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <signal.h>
 #include <pthread.h>
+
+extern volatile sig_atomic_t FLAGHISTO;
 
 extern pthread_mutex_t myMutex;
 
@@ -30,7 +34,7 @@ typedef struct
     int contProductor; //Este va a ir añadiendo datos
     int contArc, contHisto; //Estos van a ir sacando datos
 
-    int flagFull; //Este me avisa si esta lleno o no
+    int cantArc, cantHisto;
 
     int flagEnd; //Si es positivo, significa que el programa llego a su fin
 

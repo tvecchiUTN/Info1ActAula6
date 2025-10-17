@@ -1,16 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "fThreads.h"
 
 pthread_mutex_t myMutex;
 
 // Falta añadir el tema de las señales
 
+volatile sig_atomic_t FLAGHISTO = 0;
+
+void sigHisto(int sig)
+{
+    FLAGHISTO = 1;
+}
+
 int initParam(param_t *param);
 
 int main()
 {
     pthread_t hiloInput, hiloFile, hiloHisto;
+
+    signal(SIGUSR1, sigHisto);
+    
+    printf("%d\n", getpid());
 
     param_t *paramSend = malloc(sizeof(param_t));
     if (!paramSend)
@@ -78,7 +90,9 @@ int initParam(param_t *param)
     param->contArc = 0;
     param->contHisto = 0;
     param->contProductor = 0;
-    param->flagFull = 0;
+    
+    param->cantArc = 0;
+    param->cantHisto = 0;
 
     param->flagEnd = 1;
 
