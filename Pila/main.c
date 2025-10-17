@@ -69,16 +69,23 @@ int main()
     pthread_cond_destroy(&paramSend->isFull);
     pthread_cond_destroy(&paramSend->isEmpty);
 
+    if(!paramSend->contProductor)
+    {
+        free((paramSend->vecStr[paramSend->sz-1]).s);
+    }
+    else{
+        free((paramSend->vecStr[paramSend->contProductor-1]).s);
+    }
     free(paramSend->vecStr);
     free(paramSend->vecHisto);
     free(paramSend);
 
-    pthread_exit(NULL);
+    return 0;
 }
 
 int initParam(param_t *param)
 {
-    param->vecStr = malloc(CAPACIDAD * sizeof(string_t));
+    param->vecStr = calloc(CAPACIDAD, sizeof(string_t));
     if (!param->vecStr)
     {
         printf("Error soliciendo memoria\n");

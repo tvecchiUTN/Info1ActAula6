@@ -12,7 +12,6 @@ void *histograma(void *p)
     while (param->flagEnd)
     {
         char *strAnalyze = NULL;
-        char copyStr[N];
 
         pthread_mutex_lock(&myMutex);
 
@@ -22,18 +21,17 @@ void *histograma(void *p)
         }
         pthread_cond_broadcast(&param->isFull);
 
-        strcpy(copyStr, strAnalyze);
-
         pthread_mutex_unlock(&myMutex);
 
-        if (!strcmp(copyStr, FINALIZADOR))
+        if (!strcmp(strAnalyze, FINALIZADOR))
         {
             param->flagEnd = 0;
+            free(strAnalyze);
             pthread_cond_broadcast(&param->isEmpty);
             break;
         }
 
-        calcHisto(copyStr, param->vecHisto);
+        calcHisto(strAnalyze, param->vecHisto);
 
         if(FLAGHISTO)
         {
@@ -43,6 +41,8 @@ void *histograma(void *p)
             }
             FLAGHISTO = 0;
         }
+
+        free(strAnalyze);
     }
 
     pthread_exit(NULL);
@@ -55,9 +55,26 @@ char *extPilaHisto(param_t *p)
         return NULL;
     }
 
-    char *auxRet = (p->vecStr[p->contHisto]).s;
+    char *auxStr = (p->vecStr[p->contHisto]).s;
+
+    char *auxRet = malloc(N);
+    if(!auxRet)
+    {
+        printf("Error al solicitar memoria\n");
+        return NULL;
+    }
+
+    strcpy(auxRet, auxStr);
+
     (p->vecStr[p->contHisto]).flagHisto = 1;
 
+    if((p->vecStr[p->contArc]).flagArc)
+    {
+        free(auxStr);
+        (p->vecStr[p->contArc]).s = NULL;
+        (p->vecStr[p->contArc]).flagHisto = 0;
+        (p->vecStr[p->contArc]).flagArc = 0;
+    }
     p->contHisto++;
     p->contHisto %= p->sz;
 

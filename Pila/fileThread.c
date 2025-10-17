@@ -18,7 +18,6 @@ void *fileThread(void *p)
     while (param->flagEnd)
     {
         char *strAnalyze = NULL;
-        char cpyStr[N];
 
         pthread_mutex_lock(&myMutex);
 
@@ -28,23 +27,24 @@ void *fileThread(void *p)
         }
         pthread_cond_broadcast(&param->isFull);
 
-        strcpy(cpyStr, strAnalyze);
-
         pthread_mutex_unlock(&myMutex);   
         
-        if (!strcmp(cpyStr, FINALIZADOR))
+        if (!strcmp(strAnalyze, FINALIZADOR))
         {
             param->flagEnd = 0;
+            free(strAnalyze);
             pthread_cond_broadcast(&param->isEmpty);
             break;
         }
 
-        int szS = strlen(cpyStr);
+        int szS = strlen(strAnalyze);
 
-        if(write(f, cpyStr, szS) < 0)
+        if(write(f, strAnalyze, szS) < 0)
         {
             printf("Error al escribir datos\n");
         }
+
+        free(strAnalyze);
     }
 
     close(f);
@@ -58,9 +58,26 @@ char *extPilaFile(param_t *p)
         return NULL;
     }
 
-    char *auxRet = (p->vecStr[p->contArc]).s;
+    char *auxStr = (p->vecStr[p->contArc]).s;
+
+    char *auxRet = malloc(N);
+    if(!auxRet)
+    {
+        printf("Error al solicitar memoria\n");
+        return NULL;
+    }
+
+    strcpy(auxRet, auxStr);
+
     (p->vecStr[p->contArc]).flagArc = 1;
 
+    if((p->vecStr[p->contArc]).flagHisto)
+    {
+        free(auxStr);
+        (p->vecStr[p->contArc]).s = NULL;
+        (p->vecStr[p->contArc]).flagHisto = 0;
+        (p->vecStr[p->contArc]).flagArc = 0;
+    }
     p->contArc++;
     p->contArc %= p->sz;
 

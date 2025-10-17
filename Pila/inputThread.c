@@ -28,7 +28,15 @@ void *inputThread(void *p)
         }
         pthread_cond_broadcast(&parametros->isEmpty);
 
-        pthread_mutex_unlock(&myMutex);    
+        if(!strcmp(buffStr, FINALIZADOR))
+        {
+            parametros->flagEnd = 0;
+            pthread_cond_broadcast(&parametros->isEmpty);
+            pthread_mutex_unlock(&myMutex);    
+            break;
+        }
+
+        pthread_mutex_unlock(&myMutex);
     }
 
     pthread_exit(NULL);
