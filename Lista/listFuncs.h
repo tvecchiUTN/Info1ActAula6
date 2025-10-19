@@ -4,6 +4,29 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define SZSTR 32
+
+typedef struct
+{
+    char str[SZSTR];
+    unsigned int flagHisto, flagFile;
+}string_t;
+
+typedef struct lista
+{
+    string_t data;
+
+    struct lista *next;
+}lista_t;
+
+typedef struct
+{
+    lista_t *initList;
+    unsigned int flagEnd;
+
+}param_t;
 
 extern pthread_mutex_t myMutex;
 
@@ -11,6 +34,8 @@ extern pthread_mutex_t myMutex;
 #define OK 1
 
 #define FINALIZADOR "InfoI-2022\n"
+
+int pushList(lista_t **begin, const string_t *data);
 
 void *inputThread(void* param);
 
