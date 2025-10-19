@@ -10,6 +10,7 @@ lista_t *crtNode(const string_t* data)
     }
 
     node->data = *data;
+    node->next = NULL;
 
     return node;
 }
@@ -20,19 +21,45 @@ int pushList(lista_t **begin, const string_t *data)
     lista_t *node = crtNode(data);
     if(!node)
     {
-        fprintf(stderr, "Error creando nodo\n");
+        //fprintf(stderr, "Error creando nodo\n");
         return ERR;
     }
 
-    node->data = *data;
-    if(!begin)
+    if(!*begin)
     {
-        node->next = NULL;
+        *begin = node;
     }
     else{
-        node->next = *begin;
+        lista_t *auxInit = NULL;
+        for(auxInit = *begin; auxInit->next; auxInit = auxInit->next);
+        auxInit->next = node;
     }
-    *begin = node;
+    return OK;
+}
+
+int popData(lista_t *begin, string_t *data)
+{
+    if(!begin)
+    {
+        return ERR;
+    }
+
+    *data = (begin)->data;
+
+    return OK;
+}
+
+int popList(lista_t **begin)
+{
+    if(!begin)
+    {
+        return ERR;
+    }
+
+    lista_t *auxInit = (*begin)->next;
+    free(*begin);
+
+    *begin = auxInit;
 
     return OK;
 }

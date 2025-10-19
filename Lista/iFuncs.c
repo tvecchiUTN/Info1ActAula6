@@ -6,25 +6,35 @@ void *inputThread(void* param)
 
     while(p->flagEnd)
     {
-        char str[SZSTR];
-
-        fgets(str, SZSTR, stdin);
-
-        string_t *auxStr = malloc(sizeof(string_t));
-        if(!auxStr)
+        char *str = malloc(SZSTR);
+        if(!str)
         {
             printf("Error solicitando memoria\n");
             continue;
         }
 
-        strcpy(auxStr->str, str);
+        printf("Introduzca el texto: ");
+        fgets(str, SZSTR, stdin);
+
+        string_t auxStr;
+
+        auxStr.str = str;
+        auxStr.flagHisto = 0;
+        auxStr.flagFile = 0;
 
         pthread_mutex_lock(&myMutex);
 
-        pushList(&p->initList, auxStr);
+        pushList(&p->initList, &auxStr);
 
         pthread_mutex_unlock(&myMutex);
 
-        free(auxStr);
+        if(!strcmp(str, FINALIZADOR))
+        {
+            break;
+        }
     }
+
+    pthread_exit(NULL);
+
+    return NULL;
 }

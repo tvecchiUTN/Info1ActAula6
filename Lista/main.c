@@ -18,6 +18,11 @@ int main()
 
     pSend->initList = NULL;
     pSend->flagEnd = 1;
+    pSend->histograma = calloc(26, sizeof(int));
+    if(!pSend->histograma)
+    {
+        printf("Error solicitando memoria para el histograma");
+    }
 
     int err;
 
@@ -46,6 +51,7 @@ int main()
 
     pthread_mutex_destroy(&myMutex);
 
+    free(pSend->histograma);
     free(pSend);
 
     return OK;
