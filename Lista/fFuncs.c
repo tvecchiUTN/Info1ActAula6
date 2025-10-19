@@ -22,21 +22,17 @@ void *fileThread(void *param)
 
         pthread_mutex_lock(&myMutex);
 
-        if(!popData(p->initList, &strData))
+        if(!p->initList || !p->initList->data.flagHisto)
         {
             pthread_mutex_unlock(&myMutex);
             continue;
         }
 
+        popData(p->initList, &strData);
         strcpy(strRx, strData.str);
 
-        p->initList->data.flagFile = 1;
-
-        if (p->initList->data.flagHisto)
-        {
-            free(p->initList->data.str);
-            popList(&p->initList);
-        }
+        free(p->initList->data.str);
+        popList(&p->initList);
 
         pthread_mutex_unlock(&myMutex);
 

@@ -24,12 +24,6 @@ void* histoThread(void* param)
 
         p->initList->data.flagHisto = 1;
 
-        if(p->initList->data.flagFile)
-        {
-            free(p->initList->data.str);
-            popList(&p->initList);
-        }
-
         pthread_mutex_unlock(&myMutex);
 
         if(!strcmp(strRx, FINALIZADOR))
@@ -44,7 +38,7 @@ void* histoThread(void* param)
     {
         printf("La letra %c aparecio %d\n", 'A' + i, p->histograma[i]);
     }
-    
+
     pthread_exit(NULL);
 
     return NULL;
