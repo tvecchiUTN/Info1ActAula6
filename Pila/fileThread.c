@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-char *extPilaFile(param_t *p);
+int extPilaFile(param_t *p, char *auxRet);
 
 void *fileThread(void *p)
 {
@@ -17,11 +17,11 @@ void *fileThread(void *p)
 
     while (param->flagEnd)
     {
-        char *strAnalyze = NULL;
+        char strAnalyze[N];
 
         pthread_mutex_lock(&myMutex);
 
-        while(!(strAnalyze = extPilaFile(param)))
+        while(!(extPilaFile(param, strAnalyze)))
         {
             pthread_cond_wait(&param->isEmpty, &myMutex);
         }
@@ -32,7 +32,6 @@ void *fileThread(void *p)
         if (!strcmp(strAnalyze, FINALIZADOR))
         {
             param->flagEnd = 0;
-            free(strAnalyze);
             pthread_cond_broadcast(&param->isEmpty);
             break;
         }
@@ -43,29 +42,20 @@ void *fileThread(void *p)
         {
             printf("Error al escribir datos\n");
         }
-
-        free(strAnalyze);
     }
 
     close(f);
     pthread_exit(NULL);
 }
 
-char *extPilaFile(param_t *p)
+int extPilaFile(param_t *p, char *auxRet)
 {
     if (p->cantArc == 0)
     {
-        return NULL;
+        return ERR;
     }
 
-    char *auxStr = (p->vecStr[p->contArc]).s;
-
-    char *auxRet = malloc(N);
-    if(!auxRet)
-    {
-        printf("Error al solicitar memoria\n");
-        return NULL;
-    }
+    char *auxStr = (p->vecStr[p->contHisto]).s;
 
     strcpy(auxRet, auxStr);
 
@@ -83,5 +73,5 @@ char *extPilaFile(param_t *p)
 
     p->cantArc--;
 
-    return auxRet;
+    return OK;
 }

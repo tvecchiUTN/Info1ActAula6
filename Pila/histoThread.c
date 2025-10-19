@@ -1,7 +1,7 @@
 #include "fThreads.h"
 #include <string.h>
 
-char *extPilaHisto(param_t *p);
+int extPilaHisto(param_t *p, char *auxRet);
 
 void calcHisto(const char *s, int *histo);
 
@@ -11,11 +11,11 @@ void *histograma(void *p)
 
     while (param->flagEnd)
     {
-        char *strAnalyze = NULL;
+        char strAnalyze[N];
 
         pthread_mutex_lock(&myMutex);
 
-        while(!(strAnalyze = extPilaHisto(param)))
+        while(!(extPilaHisto(param, strAnalyze)))
         {
             pthread_cond_wait(&param->isEmpty, &myMutex);
         }
@@ -26,7 +26,6 @@ void *histograma(void *p)
         if (!strcmp(strAnalyze, FINALIZADOR))
         {
             param->flagEnd = 0;
-            free(strAnalyze);
             pthread_cond_broadcast(&param->isEmpty);
             break;
         }
@@ -41,34 +40,25 @@ void *histograma(void *p)
             }
             FLAGHISTO = 0;
         }
-
-        free(strAnalyze);
     }
 
     pthread_exit(NULL);
 }
 
-char *extPilaHisto(param_t *p)
+int extPilaHisto(param_t *p, char *auxRet)
 {
     if (p->cantHisto == 0)
     {
-        return NULL;
+        return ERR;
     }
 
     char *auxStr = (p->vecStr[p->contHisto]).s;
-
-    char *auxRet = malloc(N);
-    if(!auxRet)
-    {
-        printf("Error al solicitar memoria\n");
-        return NULL;
-    }
 
     strcpy(auxRet, auxStr);
 
     (p->vecStr[p->contHisto]).flagHisto = 1;
 
-    if((p->vecStr[p->contArc]).flagArc)
+    if((p->vecStr[p->contHisto]).flagArc)
     {
         free(auxStr);
         (p->vecStr[p->contArc]).s = NULL;
@@ -80,7 +70,7 @@ char *extPilaHisto(param_t *p)
 
     p->cantHisto--;
 
-    return auxRet;
+    return OK;
 }
 
 void calcHisto(const char *s, int *histo)

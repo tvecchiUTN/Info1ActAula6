@@ -69,13 +69,15 @@ int main()
     pthread_cond_destroy(&paramSend->isFull);
     pthread_cond_destroy(&paramSend->isEmpty);
 
+    int reAux;
     if(!paramSend->contProductor)
     {
-        free((paramSend->vecStr[paramSend->sz-1]).s);
+        reAux = paramSend->sz-1;
+    }else
+    {
+        reAux = paramSend->contProductor--;
     }
-    else{
-        free((paramSend->vecStr[paramSend->contProductor-1]).s);
-    }
+    free((paramSend->vecStr[reAux]).s);
     free(paramSend->vecStr);
     free(paramSend->vecHisto);
     free(paramSend);

@@ -51,16 +51,6 @@ int addPila(param_t *param, char* str)
         return ERR;
     }
 
-    int auxFArc = (param->vecStr[param->contProductor]).flagArc;
-    int auxFHis = (param->vecStr[param->contProductor]).flagHisto;
-    if(auxFArc && auxFHis)
-    {
-        free((param->vecStr[param->contProductor]).s);
-        (param->vecStr[param->contProductor]).s = NULL;
-        (param->vecStr[param->contProductor]).flagArc = 0;
-        (param->vecStr[param->contProductor]).flagHisto = 0;
-    }
-
     (param->vecStr[param->contProductor]).s = str;
 
     param->contProductor++;
