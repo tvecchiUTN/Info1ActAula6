@@ -34,11 +34,14 @@ extern pthread_mutex_t myMutex;
 #define ERR 0
 #define OK 1
 
+#define NO 0
+#define SI 1
+
 #define FINALIZADOR "InfoI-2022\n"
 
 int pushList(lista_t **begin, const string_t *data);
 
-int popData(lista_t *begin, string_t *data);
+int popData(lista_t *begin, string_t *data, int (*cond)(string_t *), int mode);
 
 int popList(lista_t **begin);
 

@@ -1,5 +1,7 @@
 #include "listFuncs.h"
 
+static int comparador(string_t* cmp);
+
 void histograma(int *histo, const char* s);
 
 void* histoThread(void* param)
@@ -14,15 +16,13 @@ void* histoThread(void* param)
 
         pthread_mutex_lock(&myMutex);
 
-        if(!popData(p->initList, &strData))
+        if(!popData(p->initList, &strData, comparador, 0))
         {
             pthread_mutex_unlock(&myMutex);
             continue;
         }
 
         strcpy(strRx, strData.str);
-
-        p->initList->data.flagHisto = 1;
 
         pthread_mutex_unlock(&myMutex);
 
@@ -59,4 +59,14 @@ void histograma(int *histo, const char* s)
             histo[c]++;
         }
     }
+}
+
+static int comparador(string_t* cmp)
+{
+    if(cmp->flagHisto)
+    {
+        return NO;
+    }
+
+    return SI;
 }

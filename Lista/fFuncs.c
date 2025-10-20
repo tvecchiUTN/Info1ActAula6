@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static int comparador(string_t* cmp);
+
 void *fileThread(void *param)
 {
     param_t *p = (param_t *)param;
@@ -28,7 +30,7 @@ void *fileThread(void *param)
             continue;
         }
 
-        popData(p->initList, &strData);
+        popData(p->initList, &strData, comparador, 1);
         strcpy(strRx, strData.str);
 
         free(p->initList->data.str);
@@ -54,4 +56,14 @@ void *fileThread(void *param)
     pthread_exit(NULL);
 
     return NULL;
+}
+
+static int comparador(string_t* cmp)
+{
+    if(cmp->flagFile)
+    {
+        return NO;
+    }
+
+    return SI;
 }
