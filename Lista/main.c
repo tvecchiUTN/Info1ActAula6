@@ -3,8 +3,12 @@
 
 pthread_mutex_t myMutex;
 
+volatile int SHOWHISTO = 0;
+
 int main()
 {
+    signal(SIGUSR1, prtHisto);
+
     pthread_t hiloInput, hiloHisto, hiloFile;
 
     pthread_mutex_init(&myMutex, NULL);
@@ -55,4 +59,9 @@ int main()
     free(pSend);
 
     return OK;
+}
+
+void prtHisto(int sig)
+{
+    SHOWHISTO = 1;
 }

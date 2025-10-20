@@ -32,11 +32,15 @@ void* histoThread(void* param)
         }
 
         histograma(p->histograma, strRx);
-    }
 
-    for(int i = 0; i < 26; i++)
-    {
-        printf("La letra %c aparecio %d\n", 'A' + i, p->histograma[i]);
+        if(SHOWHISTO)
+        {
+            for(int i = 0; i < 26; i++)
+            {
+                printf("La letra %c aparecio %d\n", 'A'+i, p->histograma[i]);
+            }
+            SHOWHISTO = 0;
+        }
     }
 
     pthread_exit(NULL);

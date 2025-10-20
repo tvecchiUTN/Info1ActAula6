@@ -31,6 +31,8 @@ typedef struct
 
 extern pthread_mutex_t myMutex;
 
+extern volatile int SHOWHISTO;
+
 #define ERR 0
 #define OK 1
 
@@ -39,16 +41,21 @@ extern pthread_mutex_t myMutex;
 
 #define FINALIZADOR "InfoI-2022\n"
 
+//Funciones listas
 int pushList(lista_t **begin, const string_t *data);
 
 int popData(lista_t *begin, string_t *data, int (*cond)(string_t *), int mode);
 
 int popList(lista_t **begin);
 
+//Funciones hilos
 void *inputThread(void* param);
 
 void* histoThread(void* param);
 
 void* fileThread(void* param);
+
+//Funciones para señales
+void prtHisto(int sig);
 
 #endif
