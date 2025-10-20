@@ -16,6 +16,12 @@ void *inputThread(void* param)
         printf("Introduzca el texto: ");
         fgets(str, SZSTR, stdin);
 
+        if(ENDPROGRAM)
+        {
+            strcpy(str, FINALIZADOR);
+            ENDPROGRAM = 0;
+        }
+
         string_t auxStr;
 
         auxStr.str = str;

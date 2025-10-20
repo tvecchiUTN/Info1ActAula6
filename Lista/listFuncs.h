@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 #define SZSTR 32
 
@@ -33,6 +34,8 @@ extern pthread_mutex_t myMutex;
 
 extern volatile int SHOWHISTO;
 
+extern volatile int ENDPROGRAM;
+
 #define ERR 0
 #define OK 1
 
@@ -57,5 +60,7 @@ void* fileThread(void* param);
 
 //Funciones para señales
 void prtHisto(int sig);
+
+void endProgram(int sig);
 
 #endif

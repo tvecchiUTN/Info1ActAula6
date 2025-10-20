@@ -5,9 +5,15 @@ pthread_mutex_t myMutex;
 
 volatile int SHOWHISTO = 0;
 
+volatile int ENDPROGRAM = 0;
+
 int main()
 {
+    printf("PID: %d\n", getpid());
+
     signal(SIGUSR1, prtHisto);
+    signal(SIGUSR2, prtHisto);
+    signal(SIGINT, endProgram);
 
     pthread_t hiloInput, hiloHisto, hiloFile;
 
@@ -64,4 +70,10 @@ int main()
 void prtHisto(int sig)
 {
     SHOWHISTO = 1;
+}
+
+void endProgram(int sig)
+{
+    //fprintf(stdin, "\nInfoI-2022\n");
+    ENDPROGRAM = 1;
 }
