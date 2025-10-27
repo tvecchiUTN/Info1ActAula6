@@ -19,6 +19,7 @@ void* histoThread(void* param)
         if(!popData(p->initList, &strData, comparador, 0))
         {
             pthread_mutex_unlock(&myMutex);
+            sleep(1);
             continue;
         }
 

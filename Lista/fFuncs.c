@@ -9,7 +9,7 @@ void *fileThread(void *param)
 {
     param_t *p = (param_t *)param;
 
-    int f = open("texto.txt", O_WRONLY | O_CREAT | O_TRUNC, 0664);
+    int f = open("output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0664);
     if (f < 0)
     {
         printf("Error creando el archivo\n");
@@ -27,6 +27,7 @@ void *fileThread(void *param)
         if(!p->initList || !p->initList->data.flagHisto)
         {
             pthread_mutex_unlock(&myMutex);
+            sleep(1);
             continue;
         }
 
